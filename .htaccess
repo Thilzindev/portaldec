@@ -1,0 +1,38 @@
+# ========================================
+# DEC PMESP — .htaccess principal
+# ========================================
+
+Options -Indexes
+ServerSignature Off
+
+# ── Bloqueia acesso direto a arquivos sensíveis ──
+<FilesMatch "^(\.env|conexao\.php|config\.php)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# ── Bloqueia acesso a pastas de upload via URL ──
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Força HTTPS (descomente em produção)
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Bloqueia acesso direto a .sql e arquivos de backup
+    RewriteRule \.(sql|bak|log|sh|env)$ - [F,L]
+</IfModule>
+
+# ── Headers de segurança ──
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ── Cache para assets estáticos ──
+<FilesMatch "\.(css|js|png|jpg|gif|ico|woff2?)$">
+    ExpiresActive On
+    ExpiresDefault "access plus 7 days"
+</FilesMatch>
